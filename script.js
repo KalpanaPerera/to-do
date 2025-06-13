@@ -92,39 +92,67 @@ const todoContainer = document.querySelector(".todo__container");
 const allTodoItemText = [];
 
 todoCreateButton.addEventListener("click", () => {
-  const todoItemText = todoInput.value;
-  todoInput.value = "";
-  if (!todoItemText) {
-    return;
-  }
-  allTodoItemText.push(todoItemText);
-  const allTodoItemHtmls = allTodoItemText.map((text) => {
-    return `<div class="todo__item">
-          <div class="todo__item__left">
-            <input type="checkbox" id="completed" name="completed" />
-            <span>${text}</span>
-          </div>
-          <div class="todo__item__right">
-            <svg
-              class="todo__delete__button"
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="red"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-trash"
-            >
-              <path d="M3 6h18" />
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-            </svg>
-          </div>
-        </div>`;
-  });
+  const todoItemText = todoInput.value.trim(); 
+  if (!todoItemText) return;
 
-  todoContainer.innerHTML = allTodoItemHtmls.join(" ");
+  allTodoItemText.push(todoItemText);
+  todoInput.value = "";
+  renderTodoList();
 });
+
+function renderTodoList() {
+  todoContainer.innerHTML = allTodoItemText.map((text, index) => {
+    return `<div class="todo__item" data-index="${index}">
+      <div class="todo__item__left">
+        <input type="checkbox" class="input_checkbox" />
+        <span>${text}</span>
+      </div>
+      <div class="todo__item__right">
+        <svg
+          class="todo__delete__button"
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="red"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 6h18" />
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+        </svg>
+      </div>
+    </div>`;
+  }).join("");
+
+  updateCheckboxListeners();
+  updateDeleteListeners();
+}
+
+function updateCheckboxListeners() {
+  const checkboxes = document.querySelectorAll(".input_checkbox");
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener("click", () => {
+      checkbox.checked = true;
+      const span = checkbox.nextElementSibling;
+      span.classList.add("todo__item--completed");
+      checkbox.disabled = true;
+    });
+  });
+}
+
+function updateDeleteListeners() {
+  const deleteButtons = document.querySelectorAll(".todo__delete__button");
+  deleteButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const item = e.target.closest(".todo__item");
+      const index = parseInt(item.getAttribute("data-index"));
+      allTodoItemText.splice(index, 1);
+      renderTodoList();
+    });
+  });
+}
+
